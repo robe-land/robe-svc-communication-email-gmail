@@ -19,5 +19,10 @@ test = [
     "pytest>=8,<9",
 ]
 
+[tool.pytest.ini_options]
+markers = [
+    "integration: requires a running local Pub/Sub emulator and service",
+]
+
 [tool.setuptools.packages.find]
 where = ["src"]

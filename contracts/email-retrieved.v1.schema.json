@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://robe.land/contracts/communication.email.retrieved/v1",
+  "title": "Email retrieved event",
+  "type": "object",
+  "required": [
+    "event_id",
+    "event_type",
+    "contract_version",
+    "occurred_at",
+    "source",
+    "correlation_id",
+    "causation_id",
+    "payload"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "event_type": {
+      "const": "communication.email.retrieved"
+    },
+    "contract_version": {
+      "const": "1"
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source": {
+      "const": "robe-svc-communication-email-gmail"
+    },
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "causation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "payload": {
+      "type": "object",
+      "required": [
+        "email_identity",
+        "sender",
+        "subject",
+        "received_at",
+        "body_text",
+        "normalization_warnings"
+      ],
+      "properties": {
+        "email_identity": {
+          "type": "object",
+          "required": ["provider", "source_account_id", "source_message_id"],
+          "properties": {
+            "provider": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "source_account_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "source_message_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "source_thread_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            }
+          },
+          "additionalProperties": false
+        },
+        "sender": {
+          "type": "object",
+          "required": ["name", "address"],
+          "properties": {
+            "name": {
+              "type": ["string", "null"]
+            },
+            "address": {
+              "type": ["string", "null"]
+            }
+          },
+          "additionalProperties": false
+        },
+        "subject": {
+          "type": ["string", "null"]
+        },
+        "received_at": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        },
+        "body_text": {
+          "type": "string"
+        },
+        "normalization_warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

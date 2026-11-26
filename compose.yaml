@@ -1,0 +1,46 @@
+name: robe-svc-communication-email-gmail
+
+services:
+  email-gmail:
+    build: .
+    environment: &service-environment
+      PUBSUB_EMULATOR_HOST: pubsub:8085
+      PUBSUB_PROJECT_ID: robe-local
+      REQUEST_TOPIC_ID: communication-email-retrieval-requests
+      EVENT_TOPIC_ID: communication-email-retrieved
+      REQUEST_SUBSCRIPTION_ID: communication-email-gmail-retrieval-requests
+      DEAD_LETTER_TOPIC_ID: communication-email-retrieval-requests-dead-letter
+      DEAD_LETTER_SUBSCRIPTION_ID: communication-email-gmail-retrieval-dead-letters
+      PUSH_ENDPOINT: http://email-gmail:8000/pubsub/push
+    ports:
+      - "127.0.0.1:18080:8000"
+    networks:
+      - default
+      - event-platform-dev
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz')"
+      interval: 2s
+      timeout: 2s
+      retries: 20
+
+  provision-resources:
+    build: .
+    command: ["python", "-m", "robe_svc_communication_email_gmail.provision_resources"]
+    environment: *service-environment
+    depends_on:
+      email-gmail:
+        condition: service_healthy
+    networks:
+      - default
+      - event-platform-dev
+    restart: "no"
+
+networks:
+  default: {}
+  event-platform-dev:
+    external: true
+    name: robe-event-platform-dev
