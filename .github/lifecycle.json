@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "base": "develop",
+  "feature_prefix": "feature/",
+  "merge_strategy": "merge",
+  "commit_gate": {
+    "commands": []
+  },
+  "readiness_gate": {
+    "commands": [
+      ["./scripts/verify"]
+    ]
+  },
+  "integration_gate": {
+    "commands": []
+  },
+  "required_ci": ["Unit tests"],
+  "required_review": false,
+  "special_authorization": []
+}
