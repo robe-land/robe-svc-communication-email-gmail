@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://robe.land/contracts/communication.email.retrieval.requested/v1",
+  "title": "Email retrieval requested event",
+  "type": "object",
+  "required": [
+    "event_id",
+    "event_type",
+    "contract_version",
+    "occurred_at",
+    "source",
+    "payload"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "event_type": {
+      "const": "communication.email.retrieval.requested"
+    },
+    "contract_version": {
+      "const": "1"
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1
+    },
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "causation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "payload": {
+      "type": "object",
+      "required": ["email_identity"],
+      "properties": {
+        "email_identity": {
+          "type": "object",
+          "required": ["provider", "source_account_id", "source_message_id"],
+          "properties": {
+            "provider": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "source_account_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "source_message_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "source_thread_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
