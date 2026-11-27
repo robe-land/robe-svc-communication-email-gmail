@@ -1,5 +1,12 @@
 # Robe Service: Communication Email Gmail
 
+[![License](https://img.shields.io/github/license/robe-land/robe-svc-communication-email-gmail)](LICENSE)
+[![CI](https://github.com/robe-land/robe-svc-communication-email-gmail/actions/workflows/ci.yml/badge.svg)](https://github.com/robe-land/robe-svc-communication-email-gmail/actions/workflows/ci.yml)
+[![Python 3.12+](https://img.shields.io/badge/Python-3.12%2B-blue)](pyproject.toml)
+[![Top language](https://img.shields.io/github/languages/top/robe-land/robe-svc-communication-email-gmail)](https://github.com/robe-land/robe-svc-communication-email-gmail)
+[![Language count](https://img.shields.io/github/languages/count/robe-land/robe-svc-communication-email-gmail)](https://github.com/robe-land/robe-svc-communication-email-gmail)
+[![Last commit](https://img.shields.io/github/last-commit/robe-land/robe-svc-communication-email-gmail)](https://github.com/robe-land/robe-svc-communication-email-gmail/commits/develop)
+
 This independently deployable service receives email retrieval requests and
 publishes normalized email retrieval events. Its first implementation
 increment uses synthetic Gmail-shaped fixtures and the local Pub/Sub
@@ -34,6 +41,14 @@ the Platform source tree or Mailflow. It connects to the Platform-owned
 `pubsub:8085`. The Platform's base `compose.yaml` contains only the emulator;
 its demo publisher and Item/Audit consumers remain in the separate demo
 composition.
+
+The service also exposes `/.well-known/robe-service.json` for the local
+Workbench. This implements the Platform-owned
+[descriptor contract](https://github.com/robe-land/robe-platform-event/blob/develop/docs/contracts/workbench-service-descriptor.v1.schema.json)
+using the service's existing Pub/Sub configuration. Its topic and
+subscription relationships are declarations, not confirmation of live
+resources; the Workbench discovers emulator resources and checks `/healthz`
+separately. The health endpoint establishes HTTP liveness only.
 
 The service owns its retrieval-request topic, push subscription, retrieved
 event topic, dead-letter topic, and dead-letter pull subscription. Its
