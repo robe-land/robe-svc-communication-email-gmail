@@ -182,6 +182,48 @@ def test_push_route_acknowledges_after_publication_and_rejects_invalid_input() -
     assert len(publisher.messages) == 1
 
 
+def test_workbench_descriptor_exposes_declared_identity_health_and_messaging(monkeypatch) -> None:
+    for key, value in {
+        "PUBSUB_PROJECT_ID": "robe-local",
+        "REQUEST_TOPIC_ID": "communication-email-retrieval-requests",
+        "EVENT_TOPIC_ID": "communication-email-retrieved",
+        "REQUEST_SUBSCRIPTION_ID": "communication-email-gmail-retrieval-requests",
+        "DEAD_LETTER_TOPIC_ID": "communication-email-retrieval-requests-dead-letter",
+        "DEAD_LETTER_SUBSCRIPTION_ID": "communication-email-gmail-retrieval-dead-letters",
+        "PUSH_ENDPOINT": "http://email-gmail:8000/pubsub/push",
+    }.items():
+        monkeypatch.setenv(key, value)
+
+    descriptor = TestClient(create_app()).get("/.well-known/robe-service.json")
+
+    assert descriptor.status_code == 200
+    data = descriptor.json()
+    assert data["schema_version"] == 1
+    assert data["service"]["id"] == "robe-svc-communication-email-gmail"
+    assert data["health"] == {"path": "/healthz"}
+    assert data["messaging"]["project_id"] == "robe-local"
+    assert {topic["role"] for topic in data["messaging"]["topics"]} == {
+        "consumes",
+        "publishes",
+        "dead_letter",
+    }
+    assert {
+        (subscription["id"], subscription["topic_id"], subscription["delivery"])
+        for subscription in data["messaging"]["subscriptions"]
+    } == {
+        (
+            "communication-email-gmail-retrieval-requests",
+            "communication-email-retrieval-requests",
+            "push",
+        ),
+        (
+            "communication-email-gmail-retrieval-dead-letters",
+            "communication-email-retrieval-requests-dead-letter",
+            "pull",
+        ),
+    }
+
+
 def test_retrieved_event_has_stable_envelope_and_normalized_fields() -> None:
     request = decode_push_message(push_wrapper(request_event(event_id="edc8aa79-26c4-4a14-8f31-99d8e6e5128c")))
     normalized = normalize_gmail_message(

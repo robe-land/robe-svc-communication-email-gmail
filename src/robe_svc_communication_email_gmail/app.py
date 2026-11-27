@@ -33,6 +33,57 @@ def create_app(service: EmailRetrievalService | None = None) -> FastAPI:
     def health() -> dict[str, str]:
         return {"status": "ok"}
 
+    @app.get("/.well-known/robe-service.json")
+    def workbench_descriptor() -> dict[str, Any]:
+        from robe_svc_communication_email_gmail.config import Settings
+
+        config = Settings.from_environment()
+        return {
+            "schema_version": 1,
+            "service": {
+                "id": "robe-svc-communication-email-gmail",
+                "name": "Gmail Email Retrieval",
+                "description": "Receives email retrieval requests and publishes normalized email events.",
+            },
+            "health": {"path": "/healthz"},
+            "messaging": {
+                "provider": "google-cloud-pubsub",
+                "project_id": config.project_id,
+                "topics": [
+                    {
+                        "id": config.request_topic_id,
+                        "name": "Email retrieval requests",
+                        "role": "consumes",
+                    },
+                    {
+                        "id": config.event_topic_id,
+                        "name": "Retrieved email events",
+                        "role": "publishes",
+                    },
+                    {
+                        "id": config.dead_letter_topic_id,
+                        "name": "Email retrieval dead letters",
+                        "role": "dead_letter",
+                    },
+                ],
+                "subscriptions": [
+                    {
+                        "id": config.request_subscription_id,
+                        "name": "Gmail retrieval requests",
+                        "topic_id": config.request_topic_id,
+                        "delivery": "push",
+                        "endpoint": "/pubsub/push",
+                    },
+                    {
+                        "id": config.dead_letter_subscription_id,
+                        "name": "Gmail retrieval dead letters",
+                        "topic_id": config.dead_letter_topic_id,
+                        "delivery": "pull",
+                    },
+                ],
+            },
+        }
+
     @app.post("/pubsub/push")
     def receive_push(wrapper: dict[str, Any]) -> Response:
         try:
