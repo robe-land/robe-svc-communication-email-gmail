@@ -49,6 +49,12 @@ using the service's existing Pub/Sub configuration. Its topic and
 subscription relationships are declarations, not confirmation of live
 resources; the Workbench discovers emulator resources and checks `/healthz`
 separately. The health endpoint establishes HTTP liveness only.
+Its optional synthetic template advertises the retrieval-request topic,
+returns a fresh request with synthetic fixture identifiers, and exposes the
+service-owned input schema from the installed contract. The Workbench may
+validate and explicitly publish that request to the local emulator; neither
+discovery nor template retrieval publishes a message. Broker acceptance
+does not prove that the retrieval service processed it.
 
 The service owns its retrieval-request topic, push subscription, retrieved
 event topic, dead-letter topic, and dead-letter pull subscription. Its

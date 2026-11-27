@@ -16,6 +16,7 @@ dependencies = [
 [project.optional-dependencies]
 test = [
     "httpx>=0.27,<1",
+    "jsonschema[format]>=4.23,<5",
     "pytest>=8,<9",
 ]
 
@@ -26,3 +27,6 @@ markers = [
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.data-files]
+"share/robe-svc-communication-email-gmail/contracts" = ["contracts/email-retrieval-requested.v1.schema.json"]
