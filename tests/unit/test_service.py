@@ -3,10 +3,12 @@ from __future__ import annotations
 import base64
 import json
 from concurrent.futures import Future
+from pathlib import Path
 from typing import Any
 from uuid import UUID, uuid4
 
 from fastapi.testclient import TestClient
+from jsonschema import Draft202012Validator, FormatChecker
 
 from robe_svc_communication_email_gmail.app import create_app
 from robe_svc_communication_email_gmail.normalization import normalize_gmail_message
@@ -15,6 +17,7 @@ from robe_svc_communication_email_gmail.service import (
     EmailRetrievalService,
     build_retrieved_event,
     decode_push_message,
+    validate_request,
 )
 
 
@@ -202,6 +205,7 @@ def test_workbench_descriptor_exposes_declared_identity_health_and_messaging(mon
     assert data["service"]["id"] == "robe-svc-communication-email-gmail"
     assert data["health"] == {"path": "/healthz"}
     assert data["messaging"]["project_id"] == "robe-local"
+    assert data["messaging"]["synthetic_templates"][0]["topic_id"] == "communication-email-retrieval-requests"
     assert {topic["role"] for topic in data["messaging"]["topics"]} == {
         "consumes",
         "publishes",
@@ -222,6 +226,26 @@ def test_workbench_descriptor_exposes_declared_identity_health_and_messaging(mon
             "pull",
         ),
     }
+
+
+def test_synthetic_template_uses_fresh_identity_and_authoritative_contract() -> None:
+    client = TestClient(create_app())
+    first = client.get("/.well-known/synthetic/retrieval-request").json()
+    second = client.get("/.well-known/synthetic/retrieval-request").json()
+    response = client.get("/.well-known/contracts/email-retrieval-requested.v1.schema.json")
+    assert response.status_code == 200
+    schema = response.json()
+    assert schema == json.loads(
+        (Path(__file__).parents[2] / "contracts/email-retrieval-requested.v1.schema.json").read_text()
+    )
+    validator = Draft202012Validator(schema, format_checker=FormatChecker())
+    validator.validate(first)
+    validator.validate(second)
+    assert first["event_id"] != second["event_id"]
+    assert first["correlation_id"] == first["event_id"]
+    assert validate_request(first).event_id == first["event_id"]
+    first["payload"]["email_identity"]["source_message_id"] = " "
+    assert not validator.is_valid(first)
 
 
 def test_retrieved_event_has_stable_envelope_and_normalized_fields() -> None:

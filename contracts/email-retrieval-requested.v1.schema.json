@@ -28,11 +28,13 @@
     },
     "source": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "pattern": "\\S"
     },
     "correlation_id": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "pattern": "\\S"
     },
     "causation_id": {
       "type": "string",
@@ -49,21 +51,25 @@
             "provider": {
               "type": "string",
               "minLength": 1,
+              "pattern": "\\S",
               "maxLength": 64
             },
             "source_account_id": {
               "type": "string",
               "minLength": 1,
+              "pattern": "\\S",
               "maxLength": 256
             },
             "source_message_id": {
               "type": "string",
               "minLength": 1,
+              "pattern": "\\S",
               "maxLength": 256
             },
             "source_thread_id": {
               "type": "string",
               "minLength": 1,
+              "pattern": "\\S",
               "maxLength": 256
             }
           },
